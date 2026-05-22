@@ -1,20 +1,20 @@
 # Amplify Fusion FHIR Healthcare AI Chat Conversation API
 
-A simple, stateful FHIR Healthcare AI chat API built in Amplify Fusion that maintains conversation context across multiple turns using (Neon) PostgreSQL for message history storage. It has the following features:
+An Amplify Fusion FHIR Healthcare AI chat API that maintains conversation context across multiple turns using (Neon) PostgreSQL for message history storage. It has the following features:
 * Conversation management using API generated converation id and either OAuth 2.0 client id or API Key Application id for conversation isolation. THis is also useful for prompt/response audit logging which is often required in finance or healthcare applications
-* Implements LLM Agent Tool loop using complex prompt and FHIR APIs via OpenAPI
-* Supports OAuth 2.0 and API Key front end security
-  * OAuth 2.0 - Extracts the Client Id and user roles from the Authorization header jwt token. Client Id is used for conversation management. Role is used for LLM Orchestration
+* Implements an LLM Agent Tool loop using a highly structured prompt and FHIR APIs via OpenAPI
+* Supports OAuth 2.0 for front end security
+  * OAuth 2.0 - Extracts the Client Id and user roles from the Authorization header jwt token. Client Id is used for conversation management. Role is used for tool approval
   * You can find a document for configuring KeyCloak for Fusion API's [here](https://gist.github.com/lbrenman/69317b109e0db85771ae29a2fab890c8)
   * API Key - Extracts Application Id from the AppId header. Application Id is used for conversation management
 * Returns `modelUsed` in response
 * Supports `modelRequested` in request but currently not leveraged yet
 
-A sample web app that supports OAuth Client Credentials, Authcode with PKCE or API Key can be found [here](https://github.com/lbrenman/fusion-ai-chat-web-app-multi-auth).
+A sample web app that supports OAuth Client Credentials, Authcode with PKCE or API Key can be found [here](https://github.com/lbrenman/fusion-ai-chat-web-app-multi-auth). Note that you must use OAuth 2 PKCE for this API.
 
 A sample FHIR Backend with FHIR R4 API and Dashboard can ne found [here](https://github.com/lbrenman/fhir-codespace).
 
-To get started, import the [AI_HCChatConversation.zip]() project export into your Fusion tenant and enter credentials for all connections and activate.
+To get started, import the [AI_HCChatConversation.zip](https://github.com/lbrenman/fusion-ai-fhir-healthcare-chat-conversation-api/blob/main/AI_HCChatConversation.zip) project export into your Fusion tenant and enter credentials for all connections and activate.
 
 Besides the API, the project also includes a cron job integration that can purge old conversations if activated.
 
