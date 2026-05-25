@@ -16,6 +16,8 @@ A sample FHIR Backend with FHIR R4 API and Dashboard can ne found [here](https:/
 
 To get started, import the [AI_HCChatConversation.zip](https://github.com/lbrenman/fusion-ai-fhir-healthcare-chat-conversation-api/blob/main/AI_HCChatConversation.zip) project export into your Fusion tenant and enter credentials for all connections and activate.
 
+Developed with Anthropic LLM model claude-sonnet-4-20250514 but is also working with claude-haiku-4-5-20251001.
+
 Besides the API, the project also includes a cron job integration that can purge old conversations if activated.
 
 * [Demo Video]()
