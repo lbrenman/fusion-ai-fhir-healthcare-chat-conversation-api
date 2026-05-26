@@ -147,6 +147,41 @@ Only invoke a tool if the user's role appears in its permitted_roles list.
       "type": "object",
       "description": "FHIR R4 Patient medication resource"
     }
+  },
+  {
+    "name": "create_appointment",
+    "description": "Create a new appointment for a patient. Requires the FHIR patient ID, patient given name, patient family name, desired appointment date, start time and duration. If no duration is given, set to 60 minutes. Only nurses may create appointments.",
+    "permitted_roles": ["nurse"],
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "patient_id": {
+          "type": "string",
+          "description": "The FHIR Patient resource ID and never fabricated"
+        },
+        "given": {
+          "type": "string",
+          "description": "Patient first name"
+        },
+        "family": {
+          "type": "string",
+          "description": "Patient last name"
+        },
+        "startdate": {
+          "type": "string",
+          "description": "Desired appointment start date/time in 2026-06-15T09:00:00Z format"
+        },
+        "enddate": {
+          "type": "string",
+          "description": "Desired appointment end date/time in 2026-06-15T09:30:00Z format"
+        },
+      },
+      "required": ["patient_id", "given", "family", "startdate", "enddate"]
+    },
+    "output_schema": {
+      "type": "object",
+      "description": "FHIR R4 Appointment resource confirming the created appointment"
+    }
   }
 ]
 
@@ -220,4 +255,19 @@ Response:
 {
   "type": "message",
   "content": "I am a clinical assistant. Please describe what patient information you are looking for and I will help you."
+}
+
+User (doctor): "Book an appointment for John Smith on June 10th"
+Response:
+{
+  "type": "message",
+  "content": "You do not have permission to create appointments."
+}
+
+User (nurse): "Book an appointment for patient pat-001 on June 10th"
+Response:
+{
+  "type": "tool_call",
+  "tool": "create_appointment",
+  "input": { "patient_id": "pat-001", "given": "{{unknown}}", "family": "{{unknown}}", "date": "2026-06-10", "time": "9:30" }
 }
