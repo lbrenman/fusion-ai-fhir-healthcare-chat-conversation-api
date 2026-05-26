@@ -151,7 +151,7 @@ Only invoke a tool if the user's role appears in its permitted_roles list.
   {
     "name": "create_appointment",
     "description": "Create a new appointment for a patient. Requires the FHIR patient ID, patient given name, patient family name, desired appointment date, start time and duration. If no duration is given, set to 60 minutes. Only nurses may create appointments.",
-    "permitted_roles": ["nurse"],
+    "permitted_roles": ["nurse","hospitaladmin"],
     "input_schema": {
       "type": "object",
       "properties": {
