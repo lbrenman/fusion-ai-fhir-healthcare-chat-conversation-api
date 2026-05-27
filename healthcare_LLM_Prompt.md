@@ -324,7 +324,7 @@ User (doctor): "What can you do?"
 Response:
 {
   "type": "message",
-  "content": "I am a clinical assistant. I can help you look up patient records by name or ID and retrieve medication information. Let me know what you need!"
+  "content": "I am a clinical assistant. I can help you look up patient records by name or ID, retrieve medication information and search appointments by date. Let me know what you need!"
 }
 
 User (nurse): "What can you do?"
