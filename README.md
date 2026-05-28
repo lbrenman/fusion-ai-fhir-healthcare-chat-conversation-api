@@ -13,8 +13,8 @@ An Amplify Fusion FHIR Healthcare AI chat API that maintains conversation contex
 
 To get started, import the [AI_HCChatConversation.zip](https://github.com/lbrenman/fusion-ai-fhir-healthcare-chat-conversation-api/blob/main/AI_HCChatConversation.zip) project export into your Fusion tenant and enter credentials for all connections and activate. Project also includes a cron job integration that can purge old conversations if activated
 
-* [Demo Video]()
-* [How It Was Built]()
+* [Demo Video](https://youtu.be/NUGrLLQjRH0)
+* [How It Was Built](https://youtu.be/4zNGkrP8Mbs)
 
 ## API
 
