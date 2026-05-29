@@ -4,7 +4,7 @@ An Amplify Fusion FHIR Healthcare AI chat API that maintains conversation contex
 
 * Conversation management using API generated converation id and OAuth 2.0 client id for conversation isolation. This is also useful for prompt/response audit logging which is often required in finance or healthcare applications
 * Implements an LLM Agent Tool loop using a highly structured prompt and FHIR APIs via OpenAPI/HTTP Client
-* Developed with Anthropic LLM model claude-sonnet-4-20250514 but is also working with claude-haiku-4-5-20251001.
+* Developed with Anthropic LLM model claude-sonnet-4-20250514.
 * Supports OAuth 2.0 for front end security
   * OAuth 2.0 - Extracts the Client Id and user roles from the Authorization header jwt token. Client Id is used for conversation management. Role is used for LLM tool approval
   * You can find a document for configuring KeyCloak for Fusion API's [here](https://gist.github.com/lbrenman/69317b109e0db85771ae29a2fab890c8)
