@@ -105,7 +105,7 @@ Only invoke a tool if the user's role appears in its permitted_roles list.
 [
   {
     "name": "get_patient_by_id",
-    "description": "Retrieve a patient record by their FHIR Patient ID. Use when the user provides an explicit patient ID.",
+    "description": "Retrieve a patient record by their FHIR Patient ID. Use when the user provides an explicit patient ID. Use to get the patient ID from patient name, for tools that require patient name if user only provides patient ID",
     "permitted_roles": ["doctor"],
     "input_schema": {
       "type": "object",
@@ -124,7 +124,7 @@ Only invoke a tool if the user's role appears in its permitted_roles list.
   },
   {
     "name": "get_patient_by_name",
-    "description": "Search for a patient by first name (given) and last name (family). Use when the user provides a patient name instead of an ID.",
+    "description": "Search for a patient by first name (given) and last name (family). Use when the user provides a patient name instead of an ID. Use this tool to get a patient's ID based on the patient name for tools that require patient ID.",
     "permitted_roles": ["doctor", "nurse", "hospitaladmin"],
     "input_schema": {
       "type": "object",
@@ -159,23 +159,6 @@ Only invoke a tool if the user's role appears in its permitted_roles list.
     }
   },
   {
-    "name": "get_patient_medication_by_patient_name",
-    "description": "Retrieve a patient's medication record by their first name (given) and last name (family).",
-    "permitted_roles": ["doctor","nurse"],
-    "input_schema": {
-      "type": "object",
-      "properties": {
-        "given": { "type": "string", "description": "Patient first name" },
-        "family": { "type": "string", "description": "Patient last name" }
-      },
-      "required": ["given", "family"]
-    },
-    "output_schema": {
-      "type": "object",
-      "description": "FHIR R4 Patient medication resource"
-    }
-  },
-  {
     "name": "get_appointments",
     "description": "Search for appointments starting from a given date. Requires a date parameter. If the user does not specify a date, ask them for one.",
     "permitted_roles": ["doctor","nurse", "hospitaladmin"],
@@ -196,7 +179,7 @@ Only invoke a tool if the user's role appears in its permitted_roles list.
   },
   {
     "name": "create_appointment",
-    "description": "Create a new appointment for a patient. Requires the FHIR patient ID, patient given name, patient family name, appointment start date/time and end date/time. If no duration is provided, default to 60 minutes. Only nurses and hospitaladmin may create appointments.",
+    "description": "Create a new appointment for a patient. Requires the FHIR patient ID, patient given name, patient family name, appointment start date/time and end date/time. If no duration is provided, default to 60 minutes. Only nurses and hospitaladmin may create appointments. If patient name is not provided, use get_patient_by_id tool to retrieve patient name",
     "permitted_roles": ["nurse", "hospitaladmin"],
     "input_schema": {
       "type": "object",

@@ -3,8 +3,8 @@
 An Amplify Fusion FHIR Healthcare AI chat API that maintains conversation context across multiple turns using (Neon) PostgreSQL for message history storage. It has the following features:
 
 * Conversation management using API generated converation id and OAuth 2.0 client id for conversation isolation. This is also useful for prompt/response audit logging which is often required in finance or healthcare applications
-* Implements an LLM Agent Tool loop using a highly structured prompt and FHIR APIs via OpenAPI/HTTP Client
-* Developed with Anthropic LLM model claude-sonnet-4-20250514
+* Implements an LLM Agent Tool loop using a highly structured prompt and FHIR APIs via OpenAPI/HTTP Client and will call multiple tools if required
+* Developed and tested with Anthropic LLM model claude-sonnet-4-20250514
 * Fallback LLM is Amazon Bedrick model us.anthropic.claude-sonnet-4-6
 * Supports OAuth 2.0 for front end security
   * OAuth 2.0 - Extracts the Client Id and user roles from the Authorization header jwt token. Client Id is used for conversation management. Role is used for LLM tool approval
