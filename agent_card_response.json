@@ -1,10 +1,12 @@
 {
   "name": "Clinical FHIR Assistant",
   "description": "A clinical assistant agent for healthcare organizations that interprets natural language requests from doctors, nurses, and hospital admins and maps them to FHIR R4 API operations. Supports patient lookup, medication retrieval, and appointment search and creation with role-based access control.",
-  "url": "https://axway-appc-se-design.sandbox.fusion.services.axway.com:4443/chatconversation/v1/prompt",
+  "url": "https://axway-appc-se-design.sandbox.fusion.services.axway.com:4443/chatconversation",
   "version": "1.0.0",
   "protocolVersion": "0.3.0",
   "preferredTransport": "HTTP+JSON",
+  "defaultInputModes": ["text"],
+  "defaultOutputModes": ["text"],
   "provider": {
     "organization": "Axway",
     "url": "https://www.axway.com"

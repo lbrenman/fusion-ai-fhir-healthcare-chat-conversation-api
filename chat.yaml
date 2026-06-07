@@ -1,15 +1,24 @@
 openapi: 3.0.3
 info:
-  title: Prompt API
+  title: Clinical FHIR Assistant API
   description: |
-    Client POSTs a JSON body with a `prompt` field and an optional `conversationId`.
-    If a `conversationId` is provided, the server will use the stored conversation
-    history as context for the request. If omitted, a new conversation will be
-    created and the generated `conversationId` will be returned in the response.
-    An optional `modelRequested` field allows the client to request a specific LLM
-    model. The actual model used is returned in the response as `modelUsed`.
-    Server responds with a JSON object containing the assistant reply, the conversationId,
-    and the model used.
+    A clinical assistant API for healthcare organizations. Supports two interaction modes:
+
+    1. **Prompt API** (/v1/prompt): Standard chat endpoint for web app clients. Client POSTs
+       a JSON body with a `prompt` field and an optional `conversationId`. If a `conversationId`
+       is provided, the server will use the stored conversation history as context for the request.
+       If omitted, a new conversation will be created and the generated `conversationId` will be
+       returned in the response. An optional `modelRequested` field allows the client to request
+       a specific LLM model. The actual model used is returned in the response as `modelUsed`.
+
+    2. **A2A API** (/v1/message:send): A2A protocol compliant endpoint for agent-to-agent
+       interoperability. Accepts A2A HTTP+JSON transport envelopes per the A2A specification.
+       The agent card url is the base URL and the inspector appends /v1/message:send automatically.
+
+    Three well-known endpoints expose the A2A agent card for discovery:
+    - /.well-known/agent-card.json
+    - /.well-known/agent.json
+    - /.well-known/agent-card
   version: 1.0.0
 paths:
   /.well-known/agent-card.json:
@@ -84,7 +93,12 @@ paths:
     post:
       summary: Submit a prompt and receive a response
       operationId: prompt
+      description: |
+        Standard chat endpoint for web app clients. Accepts a natural language prompt
+        and optional conversation ID for multi-turn context. Returns the assistant reply,
+        conversation ID, and model used.
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -105,15 +119,14 @@ paths:
                 modelRequested:
                   type: string
                   description: |
-                    Optional. The model to use for this request (e.g. "gpt-4o", "claude-sonnet-4-6").
+                    Optional. The model to use for this request (e.g. "gpt-4o", "claude-haiku-4-5").
                     If omitted or if the requested model is unavailable, the server
                     will use its default model.
               additionalProperties: false
             example:
-              prompt: What is my name?
+              prompt: Find patient John Smith
               conversationId: "abc-123"
-              modelRequested: "gpt-4o"
-        required: true
+              modelRequested: "claude-haiku-4-5"
       responses:
         "200":
           description: Successful response from the LLM
@@ -122,9 +135,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/PromptResponse"
               example:
-                message: "Your name is Leor."
+                message: "Here are the results for John Smith..."
                 conversationId: "abc-123"
-                modelUsed: "gpt-4o"
+                modelUsed: "claude-haiku-4-5"
         "400":
           description: Invalid request
           content:
@@ -137,6 +150,61 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+
+  /v1/message:send:
+    post:
+      summary: A2A protocol compliant message endpoint
+      operationId: a2aMessageSend
+      description: |
+        A2A protocol compliant endpoint using the A2A HTTP+JSON transport format.
+        The inspector sends the message object directly at the top level with
+        transport and method fields. Bearer token must be included in the
+        Authorization header.
+        Role values use A2A enum constants: ROLE_USER for requests, ROLE_AGENT
+        for responses. Content parts use field presence to determine type:
+        use text field for text responses, file for file responses, data for
+        structured data responses. Do not include a kind field in content parts.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/A2ARequest"
+            example:
+              transport: "HTTP+JSON"
+              method: "message/send"
+              message:
+                messageId: "msg-1780870283574-5s01k0owy"
+                role: "ROLE_USER"
+                metadata: {}
+                content:
+                  - text: "Find patient John Smith"
+      responses:
+        "200":
+          description: Successful A2A response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/A2AResponse"
+              example:
+                message:
+                  messageId: "msg-response-001"
+                  role: "ROLE_AGENT"
+                  contextId: "abc-123"
+                  content:
+                    - text: "Here are the results for John Smith..."
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/A2AError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/A2AError"
 
 components:
   schemas:
@@ -156,37 +224,24 @@ components:
       properties:
         name:
           type: string
-          description: Human-readable name of the agent.
         description:
           type: string
-          description: Brief description of what the agent does.
         url:
           type: string
-          description: Base URL of the agent's API endpoint.
         version:
           type: string
-          description: Version of this agent.
         protocolVersion:
           type: string
-          description: A2A protocol version in semver format.
-          example: "0.3.0"
         preferredTransport:
           type: string
-          description: Preferred transport protocol.
-          enum: ["JSONRPC", "GRPC", "HTTP+JSON"]
-          example: "HTTP+JSON"
         defaultInputModes:
           type: array
-          description: Default input modes supported by the agent.
           items:
             type: string
-          example: ["text"]
         defaultOutputModes:
           type: array
-          description: Default output modes supported by the agent.
           items:
             type: string
-          example: ["text"]
         provider:
           type: object
           properties:
@@ -236,6 +291,145 @@ components:
                 items:
                   type: string
 
+    A2ARequest:
+      type: object
+      required:
+        - transport
+        - method
+        - message
+      properties:
+        transport:
+          type: string
+          description: Transport protocol identifier e.g. HTTP+JSON
+        method:
+          type: string
+          description: A2A method to invoke e.g. message/send
+        message:
+          type: object
+          required:
+            - messageId
+            - role
+            - content
+          properties:
+            messageId:
+              type: string
+              description: Unique identifier for this request message
+            role:
+              type: string
+              description: Sender role e.g. ROLE_USER
+            contextId:
+              type: string
+              description: Optional context ID for multi-turn conversation continuity.
+                Maps to conversationId internally.
+            taskId:
+              type: string
+              description: Optional task ID if associated with an existing task
+            metadata:
+              type: object
+              additionalProperties: true
+              description: Optional metadata
+            content:
+              type: array
+              description: |
+                Message content parts. Type is determined by field presence:
+                use text for plain text, file for file content, data for
+                structured data. Do not include a kind field.
+              items:
+                type: object
+                properties:
+                  text:
+                    type: string
+                    description: Plain text content
+                  file:
+                    type: object
+                    description: File content
+                    additionalProperties: true
+                  data:
+                    type: object
+                    description: Structured data content
+                    additionalProperties: true
+                  metadata:
+                    type: object
+                    additionalProperties: true
+                    description: Optional part-level metadata
+
+    A2AResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: object
+          required:
+            - messageId
+            - role
+            - content
+          properties:
+            messageId:
+              type: string
+              description: Unique identifier for this response message
+            role:
+              type: string
+              description: Sender role e.g. ROLE_AGENT
+            contextId:
+              type: string
+              description: Context ID for use in subsequent requests.
+                Maps to conversationId internally.
+            taskId:
+              type: string
+              description: Optional task ID if associated with a task
+            metadata:
+              type: object
+              additionalProperties: true
+              description: Optional metadata
+            extensions:
+              type: array
+              items:
+                type: string
+              description: Optional extension URIs
+            content:
+              type: array
+              description: |
+                Response content parts. Type is determined by field presence:
+                use text for plain text, file for file content, data for
+                structured data. Do not include a kind field.
+              items:
+                type: object
+                properties:
+                  text:
+                    type: string
+                    description: Plain text content
+                  file:
+                    type: object
+                    description: File content
+                    additionalProperties: true
+                  data:
+                    type: object
+                    description: Structured data content
+                    additionalProperties: true
+                  metadata:
+                    type: object
+                    additionalProperties: true
+                    description: Optional part-level metadata
+
+    A2AError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: integer
+              description: Error code
+            message:
+              type: string
+              description: Human readable error description
+
     PromptResponse:
       required:
       - message
@@ -245,18 +439,10 @@ components:
       properties:
         message:
           type: string
-          description: The assistant's reply.
         conversationId:
           type: string
-          description: |
-            The conversation identifier. Use this in subsequent requests
-            to maintain conversation context.
         modelUsed:
           type: string
-          description: |
-            The model that was actually used to generate the response.
-            May differ from modelRequested if the requested model was
-            unavailable or not recognized.
       additionalProperties: false
 
     Error:
