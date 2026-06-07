@@ -1,0 +1,77 @@
+{
+  "name": "Clinical FHIR Assistant",
+  "description": "A clinical assistant agent for healthcare organizations that interprets natural language requests from doctors, nurses, and hospital admins and maps them to FHIR R4 API operations. Supports patient lookup, medication retrieval, and appointment search and creation with role-based access control.",
+  "url": "https://axway-appc-se-design.sandbox.fusion.services.axway.com:4443/chatconversation/v1/prompt",
+  "version": "1.0.0",
+  "protocolVersion": "0.3.0",
+  "preferredTransport": "HTTP+JSON",
+  "provider": {
+    "organization": "Axway",
+    "url": "https://www.axway.com"
+  },
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false
+  },
+  "authentication": {
+    "schemes": ["bearer"],
+    "description": "Requires a valid OAuth 2.0 bearer token obtained via Authorization Code + PKCE flow. The token must include the user's role claim (doctor, nurse, or hospitaladmin). Medication access is restricted to the doctor role. Appointment creation is restricted to nurse and hospitaladmin roles."
+  },
+  "skills": [
+    {
+      "id": "get_patient_by_id",
+      "name": "Get Patient by ID",
+      "description": "Retrieve a specific patient record by FHIR Patient ID. Restricted to the doctor role.",
+      "tags": ["fhir", "patient", "lookup", "healthcare", "doctor"],
+      "examples": [
+        "Get patient with ID pat-001",
+        "Show me the record for patient pat-222",
+        "Retrieve patient 12345"
+      ]
+    },
+    {
+      "id": "get_patient_by_name",
+      "name": "Get Patient by Name",
+      "description": "Search for a patient by first and last name. Available to doctors, nurses, and hospital admins.",
+      "tags": ["fhir", "patient", "search", "healthcare"],
+      "examples": [
+        "Find patient John Smith",
+        "Look up patient Jane Doe",
+        "Search for patient Margaret Thompson"
+      ]
+    },
+    {
+      "id": "get_patient_medication_by_patient_id",
+      "name": "Get Patient Medication by Patient ID",
+      "description": "Retrieve a patient's medication record by their FHIR Patient ID. Restricted to the doctor role.",
+      "tags": ["fhir", "medication", "lookup", "healthcare", "doctor"],
+      "examples": [
+        "Show me the medications for patient pat-001",
+        "Get medication record for patient 12345"
+      ]
+    },
+    {
+      "id": "get_appointments",
+      "name": "Get Appointments",
+      "description": "Search for appointments starting from a given date. Requires a date. Available to doctors, nurses, and hospital admins.",
+      "tags": ["fhir", "appointment", "search", "scheduling", "healthcare"],
+      "examples": [
+        "Show appointments after June 1st 2026",
+        "Get all appointments starting from July 1st 2026",
+        "Find appointments from today onwards"
+      ]
+    },
+    {
+      "id": "create_appointment",
+      "name": "Create Appointment",
+      "description": "Create a new appointment for a patient. Requires patient ID, patient name, start and end date/time. Restricted to nurse and hospitaladmin roles.",
+      "tags": ["fhir", "appointment", "create", "scheduling", "healthcare"],
+      "examples": [
+        "Book an appointment for patient pat-001 John Smith on June 15th at 9am for 30 minutes",
+        "Schedule an appointment for Jane Doe starting July 10th at 2pm for 1 hour",
+        "Create a 30 minute appointment for patient pat-003 on August 1st at 10am"
+      ]
+    }
+  ]
+}

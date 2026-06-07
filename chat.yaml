@@ -12,6 +12,74 @@ info:
     and the model used.
   version: 1.0.0
 paths:
+  /.well-known/agent-card.json:
+    get:
+      summary: Get A2A Agent Card
+      operationId: getAgentCardJson
+      description: |
+        Returns the A2A protocol agent card describing this agent's capabilities,
+        skills, and auth requirements. No authentication required.
+      security: []
+      responses:
+        "200":
+          description: A2A agent card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentCard"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /.well-known/agent.json:
+    get:
+      summary: Get A2A Agent Card (alternate path)
+      operationId: getAgentJson
+      description: |
+        Returns the A2A protocol agent card describing this agent's capabilities,
+        skills, and auth requirements. No authentication required.
+      security: []
+      responses:
+        "200":
+          description: A2A agent card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentCard"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /.well-known/agent-card:
+    get:
+      summary: Get A2A Agent Card (no extension)
+      operationId: getAgentCard
+      description: |
+        Returns the A2A protocol agent card describing this agent's capabilities,
+        skills, and auth requirements. No authentication required.
+        This path is used by the A2A Inspector and other tools that fetch the
+        agent card without a file extension.
+      security: []
+      responses:
+        "200":
+          description: A2A agent card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentCard"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /v1/prompt:
     post:
       summary: Submit a prompt and receive a response
@@ -69,8 +137,105 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+
 components:
   schemas:
+    AgentCard:
+      type: object
+      required:
+        - name
+        - description
+        - url
+        - version
+        - protocolVersion
+        - preferredTransport
+        - defaultInputModes
+        - defaultOutputModes
+        - capabilities
+        - skills
+      properties:
+        name:
+          type: string
+          description: Human-readable name of the agent.
+        description:
+          type: string
+          description: Brief description of what the agent does.
+        url:
+          type: string
+          description: Base URL of the agent's API endpoint.
+        version:
+          type: string
+          description: Version of this agent.
+        protocolVersion:
+          type: string
+          description: A2A protocol version in semver format.
+          example: "0.3.0"
+        preferredTransport:
+          type: string
+          description: Preferred transport protocol.
+          enum: ["JSONRPC", "GRPC", "HTTP+JSON"]
+          example: "HTTP+JSON"
+        defaultInputModes:
+          type: array
+          description: Default input modes supported by the agent.
+          items:
+            type: string
+          example: ["text"]
+        defaultOutputModes:
+          type: array
+          description: Default output modes supported by the agent.
+          items:
+            type: string
+          example: ["text"]
+        provider:
+          type: object
+          properties:
+            organization:
+              type: string
+            url:
+              type: string
+        capabilities:
+          type: object
+          properties:
+            streaming:
+              type: boolean
+            pushNotifications:
+              type: boolean
+            stateTransitionHistory:
+              type: boolean
+        authentication:
+          type: object
+          properties:
+            schemes:
+              type: array
+              items:
+                type: string
+            description:
+              type: string
+        skills:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - name
+              - description
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              description:
+                type: string
+              tags:
+                type: array
+                items:
+                  type: string
+              examples:
+                type: array
+                items:
+                  type: string
+
     PromptResponse:
       required:
       - message
@@ -93,6 +258,7 @@ components:
             May differ from modelRequested if the requested model was
             unavailable or not recognized.
       additionalProperties: false
+
     Error:
       required:
       - message
