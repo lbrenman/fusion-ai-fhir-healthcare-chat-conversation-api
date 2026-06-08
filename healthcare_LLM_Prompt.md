@@ -142,7 +142,7 @@ Only invoke a tool if the user's role appears in its permitted_roles list.
   {
     "name": "get_patient_medication_by_patient_id",
     "description": "Retrieve a patient's medication record by their FHIR Patient ID.",
-    "permitted_roles": ["doctor","nurse"],
+    "permitted_roles": ["doctor","nurse","hospitaladmin"],
     "input_schema": {
       "type": "object",
       "properties": {
